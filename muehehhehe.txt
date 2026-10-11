@@ -1,0 +1,715 @@
+// Newton's forward difference
+#include<stdio.h>
+
+#define MAX 20
+
+int main() {
+  int n;
+  double x[MAX], y[MAX], diff[MAX][MAX];
+
+  printf("Enter number of data points: ");
+  scanf("%d", &n);
+
+  for (int i = 0; i < n; i++) {
+    printf("x[%d]: ", i);
+    scanf("%lf", &x[i]);
+    printf("y[%d]: ", i);
+    scanf("%lf", &y[i]);
+  }
+
+  double h = x[1] - x[0];
+
+  for (int i = 0; i < n; i++) {
+    diff[i][0] = y[i];
+  }
+
+  for (int j = 1; j < n; j++) {
+    for (int i = 0; i < n - j; i++) {
+      diff[i][j] = diff[i + 1][j - 1] - diff[i][j - 1];
+    }
+  }
+
+  printf("\nForward Difference Table:\n\n");
+
+  for (int i = 0; i < n; i++) {
+    printf("%-10.4f", x[i]);
+    for (int j = 0; j < n - i; j++) {
+      printf("%-12.4f", diff[i][j]);
+    }
+    printf("\n");
+  }
+
+  double xp;
+  printf("\nEnter x to interpolate: ");
+  scanf("%lf", &xp);
+
+  double u = (xp - x[0]) / h;
+  double result = diff[0][0];
+  double u_term = 1.0;
+
+  for (int i = 1; i < n; i++) {
+    u_term *= (u - (i - 1)) / i;
+    result += u_term * diff[0][i];
+  }
+
+  printf("\nInterpolated value at x = %.4f is y = %.6f\n", xp, result);
+
+  return 0;
+}
+// Newton's backward difference
+#include <stdio.h>
+
+#define MAX 20
+
+int main() {
+  int n;
+  double x[MAX], y[MAX], diff[MAX][MAX];
+
+  printf("Enter number of data points: ");
+  scanf("%d", &n);
+
+  for (int i = 0; i < n; i++) {
+    printf("x[%d]: ", i);
+    scanf("%lf", &x[i]);
+    printf("y[%d]: ", i);
+    scanf("%lf", &y[i]);
+  }
+
+  double h = x[1] - x[0];
+
+  for (int i = 0; i < n; i++) {
+    diff[i][0] = y[i];
+  }
+
+  for (int j = 1; j < n; j++) {
+    for (int i = j; i < n; i++) {
+      diff[i][j] = diff[i][j - 1] - diff[i - 1][j - 1];
+    }
+  }
+
+  printf("\nBackward Difference Table:\n\n");
+
+  for (int i = 0; i < n; i++) {
+    printf("%-10.4f", x[i]);
+    for (int j = 0; j <= i; j++) {
+      printf("%-12.4f", diff[i][j]);
+    }
+    printf("\n");
+  }
+
+  double xp;
+  printf("\nEnter x to interpolate: ");
+  scanf("%lf", &xp);
+
+  double u = (xp - x[n - 1]) / h;
+  double result = diff[n - 1][0];
+  double u_term = 1.0;
+
+  for (int i = 1; i < n; i++) {
+    u_term *= (u + (i - 1)) / i;
+    result += u_term * diff[n - 1][i];
+  }
+
+  printf("\nInterpolated value at x = %.4f is y = %.6f\n", xp, result);
+
+  return 0;
+}
+// Lagrange's interpolation
+#include <stdio.h>
+
+#define MAX 20
+
+int main() {
+  int n;
+  double x[MAX], y[MAX];
+
+  printf("Enter number of data points: ");
+  scanf("%d", &n);
+
+  for (int i = 0; i < n; i++) {
+    printf("x[%d]: ", i);
+    scanf("%lf", &x[i]);
+    printf("y[%d]: ", i);
+    scanf("%lf", &y[i]);
+  }
+
+  double xp;
+  printf("\nEnter x to interpolate: ");
+  scanf("%lf", &xp);
+
+  double result = 0.0;
+
+  printf("\n i\t x[i]\t\t y[i]\t\t L_i(x)\t\t Term (L_i * y_i)\n");
+  for (int i = 0; i < n; i++) {
+    double Li = 1.0;
+    for (int j = 0; j < n; j++) {
+      if (j != i) {
+        Li *= (xp - x[j]) / (x[i] - x[j]);
+      }
+    }
+    double term = Li * y[i];
+    result += term;
+    printf("%2d\t%.6f\t%.6f\t%.6f\t%.6f\n", i, x[i], y[i], Li, term);
+  }
+
+  printf("\nInterpolated value at x = %.4f is y = %.6f\n", xp, result);
+
+  return 0;
+}
+// Newton's divided difference (general formula)
+#include <stdio.h>
+
+#define MAX 20
+
+int main() {
+  int n;
+  double x[MAX], y[MAX], dd[MAX][MAX];
+
+  printf("Enter number of data points: ");
+  scanf("%d", &n);
+
+  for (int i = 0; i < n; i++) {
+    printf("x[%d], y[%d]: ", i, i);
+    scanf("%lf %lf", &x[i], &y[i]);
+  }
+
+  for (int i = 0; i < n; i++) {
+    dd[i][0] = y[i];
+  }
+
+  for (int j = 1; j < n; j++) {
+    for (int i = 0; i < n - j; i++) {
+      dd[i][j] = (dd[i + 1][j - 1] - dd[i][j - 1]) / (x[i + j] - x[i]);
+    }
+  }
+
+  printf("\nDivided Difference Table:\n\n");
+  printf("%-10s", "x");
+  for (int j = 0; j < n; j++) {
+    printf("Order %-6d", j);
+  }
+  printf("\n");
+
+  for (int i = 0; i < n; i++) {
+    printf("%-10.4f", x[i]);
+    for (int j = 0; j < n - i; j++) {
+      printf("%-12.6f", dd[i][j]);
+    }
+    printf("\n");
+  }
+
+  double xp;
+  printf("\nEnter x to interpolate: ");
+  scanf("%lf", &xp);
+
+  double result = dd[0][0];
+  double product = 1.0;
+
+  for (int i = 1; i < n; i++) {
+    product *= (xp - x[i - 1]);
+    result += dd[0][i] * product;
+  }
+
+  printf("\nInterpolated value at x = %.4f is y = %.6f\n", xp, result);
+
+  return 0;
+}
+// Tabulation
+#include <math.h>
+#include <stdio.h>
+
+double f(double x) { return exp(x) + log(1 + x) / log(3) - 2.2; }
+
+int main() {
+  double a, b, x, y1, y2, d;
+  int n;
+
+  printf("Enter interval [a, b]: ");
+  scanf("%lf %lf", &a, &b);
+  printf("Enter number of refinements: ");
+  scanf("%d", &n);
+
+  d = b - a;
+  y1 = f(a);
+
+  printf("\n Ref\t a\t\t b\t\t f(a)\t\t f(b)\n");
+  for (int i = 1; i <= n; i++) {
+    d = d / 10.0;
+    for (int j = 1; j <= 10; j++) {
+      x = a + d;
+      y2 = f(x);
+      if (y1 * y2 < 0) {
+        b = x;
+        break;
+      } else {
+        a = x;
+        y1 = y2;
+      }
+    }
+    printf("%2d\t%.6f\t%.6f\t%.6f\t%.6f\n", i, a, b, f(a), f(b));
+  }
+
+  if (fabs(y1) < fabs(f(b))) {
+    printf("\nRoot = %.6f (correct to %d decimal places)\n", a, n);
+  } else {
+    printf("\nRoot = %.6f (correct to %d decimal places)\n", a + d, n);
+  }
+
+  return 0;
+}
+// Bisection Method
+#include <math.h>
+#include <stdio.h>
+
+double f(double x) { return exp(x) + log(1 + x) / log(3) - 2.2; }
+
+int main() {
+  double a, b, x, y, y1, y2, eps, tol;
+  int n = 0;
+
+  printf("Enter interval [a, b]: ");
+  scanf("%lf %lf", &a, &b);
+  printf("Enter decimal places of accuracy (or tolerance): ");
+  scanf("%lf", &tol);
+
+  int k = (tol >= 1.0) ? (int)tol : (int)ceil(-log10(tol));
+  eps = (tol >= 1.0) ? pow(10, -k) : tol;
+
+  y1 = f(a);
+  y2 = f(b);
+
+  if (y1 * y2 > 0) {
+    printf("f(a) and f(b) must have opposite signs.\n");
+    return 1;
+  }
+
+  printf("\n n\t a\t\t b\t\t x\t\t f(x)\n");
+
+  do {
+    x = (a + b) / 2.0;
+    y = f(x);
+    printf("%2d\t%.6f\t%.6f\t%.6f\t%.6f\n", n, a, b, x, y);
+
+    if (y * y1 < 0) {
+      b = x;
+      y2 = y;
+    } else {
+      a = x;
+      y1 = y;
+    }
+    n++;
+  } while (fabs(b - a) > eps);
+
+  printf("\nRoot = %.6f (correct to %d decimal places)\n", x, k);
+
+  return 0;
+}
+// Regula Falsi Method
+#include <math.h>
+#include <stdio.h>
+
+double f(double x) { return exp(x) + log(1 + x) / log(3) - 2.2; }
+
+int main() {
+  double a, b, x, y, y1, y2, eps, tol;
+  int n = 0;
+
+  printf("Enter interval [a, b]: ");
+  scanf("%lf %lf", &a, &b);
+  printf("Enter decimal places of accuracy (or tolerance): ");
+  scanf("%lf", &tol);
+
+  int k = (tol >= 1.0) ? (int)tol : (int)ceil(-log10(tol));
+  eps = (tol >= 1.0) ? pow(10, -k) : tol;
+
+  y1 = f(a);
+  y2 = f(b);
+
+  if (y1 * y2 > 0) {
+    printf("f(a) and f(b) must have opposite signs.\n");
+    return 1;
+  }
+
+  printf("\n n\t a\t\t b\t\t x\t\t f(x)\n");
+
+  do {
+    x = a - y1 * (b - a) / (y2 - y1);
+    y = f(x);
+    printf("%2d\t%.6f\t%.6f\t%.6f\t%.6f\n", n, a, b, x, y);
+
+    if (y * y1 < 0) {
+      b = x;
+      y2 = y;
+    } else {
+      a = x;
+      y1 = y;
+    }
+    n++;
+  } while (fabs(y) > eps);
+
+  printf("\nRoot = %.6f (correct to %d decimal places)\n", x, k);
+
+  return 0;
+}
+// Newton-Raphson Method
+#include <stdio.h>
+
+double f(double x) { return exp(x) + log(1 + x) / log(3) - 2.2; }
+
+double df(double x) { return exp(x) + 1.0 / ((1 + x) * log(3)); }
+
+int main() {
+  double x, x1, eps, tol;
+  int n = 0;
+
+  printf("Enter initial guess: ");
+  scanf("%lf", &x);
+  printf("Enter decimal places of accuracy (or tolerance): ");
+  scanf("%lf", &tol);
+
+  int k = (tol >= 1.0) ? (int)tol : (int)ceil(-log10(tol));
+  eps = (tol >= 1.0) ? pow(10, -k) : tol;
+
+  printf("\n n\t x\t\t f(x)\t\t f'(x)\n");
+
+  do {
+    double fx = f(x);
+    double dfx = df(x);
+
+    if (fabs(dfx) < 1e-12) {
+      printf("Derivative too small, method fails.\n");
+      return 1;
+    }
+
+    printf("%2d\t%.6f\t%.6f\t%.6f\n", n, x, fx, dfx);
+    x1 = x - fx / dfx;
+    if (fabs(x1 - x) < eps) {
+      break;
+    }
+    x = x1;
+    n++;
+  } while (n < 100);
+
+  printf("\nRoot = %.6f (correct to %d decimal places)\n", x1, k);
+
+  return 0;
+}
+// Fixed point interation 
+#include <math.h>
+#include <stdio.h>
+
+double f(double x) { return exp(x) + log(1 + x) / log(3) - 2.2; }
+
+double g(double x) { return log(2.2 - log(1 + x) / log(3)); }
+
+int main() {
+  double x, x1, eps, tol;
+  int n = 0;
+
+  printf("Enter initial guess: ");
+  scanf("%lf", &x);
+  printf("Enter decimal places of accuracy (or tolerance): ");
+  scanf("%lf", &tol);
+
+  int k = (tol >= 1.0) ? (int)tol : (int)ceil(-log10(tol));
+  eps = (tol >= 1.0) ? pow(10, -k) : tol;
+
+  printf("\n n\t x_n\t\t g(x_n)\t\t |x_(n+1) - x_n|\n");
+
+  do {
+    x1 = g(x);
+    double diff = fabs(x1 - x);
+    printf("%2d\t%.6f\t%.6f\t%.6f\n", n, x, x1, diff);
+
+    if (diff < eps) {
+      break;
+    }
+    x = x1;
+    n++;
+  } while (n < 100);
+
+  printf("\nRoot = %.6f (correct to %d decimal places)\n", x1, k);
+
+  return 0;
+}
+// Guass Jordan
+#include <math.h>
+#include <stdio.h>
+
+#define MAX 10
+
+int main() {
+  int n;
+  double a[MAX][MAX + 1];
+
+  printf("Enter number of equations: ");
+  scanf("%d", &n);
+
+  printf("Enter augmented matrix [A|b] row by row:\n");
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j <= n; j++) {
+      scanf("%lf", &a[i][j]);
+    }
+  }
+
+  for (int i = 0; i < n; i++) {
+    int max_row = i;
+    for (int k = i + 1; k < n; k++) {
+      if (fabs(a[k][i]) > fabs(a[max_row][i])) {
+        max_row = k;
+      }
+    }
+    for (int j = 0; j <= n; j++) {
+      double temp = a[i][j];
+      a[i][j] = a[max_row][j];
+      a[max_row][j] = temp;
+    }
+
+    double pivot = a[i][i];
+    if (fabs(pivot) < 1e-12) {
+      printf("No unique solution exists.\n");
+      return 1;
+    }
+    for (int j = 0; j <= n; j++) {
+      a[i][j] /= pivot;
+    }
+
+    for (int k = 0; k < n; k++) {
+      if (k != i) {
+        double factor = a[k][i];
+        for (int j = 0; j <= n; j++) {
+          a[k][j] -= factor * a[i][j];
+        }
+      }
+    }
+  }
+
+  printf("\nReduced Row Echelon Form [A|b]:\n");
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j <= n; j++) {
+      printf("%10.4f", a[i][j]);
+    }
+    printf("\n");
+  }
+
+  printf("\nSolution:\n");
+  for (int i = 0; i < n; i++) {
+    printf("x[%d] = %.6f\n", i, a[i][n]);
+  }
+
+  return 0;
+}
+// Guass Jacobi
+#include <math.h>
+#include <stdio.h>
+
+#define MAX 10
+
+int main() {
+  int n;
+  double a[MAX][MAX], b[MAX], x[MAX] = {0}, x_new[MAX], eps, tol;
+
+  printf("Enter number of equations: ");
+  scanf("%d", &n);
+
+  printf("Enter augmented matrix [A|b] row by row:\n");
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      scanf("%lf", &a[i][j]);
+    }
+    scanf("%lf", &b[i]);
+  }
+
+  printf("Enter decimal places of accuracy (or tolerance): ");
+  scanf("%lf", &tol);
+
+  int k = (tol >= 1.0) ? (int)tol : (int)ceil(-log10(tol));
+  eps = (tol >= 1.0) ? pow(10, -k) : tol;
+
+  printf("\nIter\t");
+  for (int i = 0; i < n; i++) {
+    printf("x[%d]\t\t", i);
+  }
+  printf("\n");
+
+  int iter = 0;
+  while (iter < 100) {
+    double max_diff = 0.0;
+
+    for (int i = 0; i < n; i++) {
+      double sum = b[i];
+      for (int j = 0; j < n; j++) {
+        if (j != i) {
+          sum -= a[i][j] * x[j];
+        }
+      }
+      x_new[i] = sum / a[i][i];
+      double diff = fabs(x_new[i] - x[i]);
+      if (diff > max_diff) {
+        max_diff = diff;
+      }
+    }
+
+    for (int i = 0; i < n; i++) {
+      x[i] = x_new[i];
+    }
+
+    iter++;
+    printf("%2d\t", iter);
+    for (int i = 0; i < n; i++) {
+      printf("%.6f\t", x[i]);
+    }
+    printf("\n");
+
+    if (max_diff < eps) {
+      break;
+    }
+  }
+
+  printf("\nSolution after %d iterations:\n", iter);
+  for (int i = 0; i < n; i++) {
+    printf("x[%d] = %.6f\n", i, x[i]);
+  }
+
+  return 0;
+}
+// Guass Seidel
+#include <math.h>
+#include <stdio.h>
+
+#define MAX 10
+
+int main() {
+  int n;
+  double a[MAX][MAX], b[MAX], x[MAX] = {0}, eps, tol;
+
+  printf("Enter number of equations: ");
+  scanf("%d", &n);
+
+  printf("Enter augmented matrix [A|b] row by row:\n");
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      scanf("%lf", &a[i][j]);
+    }
+    scanf("%lf", &b[i]);
+  }
+
+  printf("Enter decimal places of accuracy (or tolerance): ");
+  scanf("%lf", &tol);
+
+  int k = (tol >= 1.0) ? (int)tol : (int)ceil(-log10(tol));
+  eps = (tol >= 1.0) ? pow(10, -k) : tol;
+
+  printf("\nIter\t");
+  for (int i = 0; i < n; i++) {
+    printf("x[%d]\t\t", i);
+  }
+  printf("\n");
+
+  int iter = 0;
+  while (iter < 100) {
+    double max_diff = 0.0;
+
+    for (int i = 0; i < n; i++) {
+      double sum = b[i];
+      for (int j = 0; j < n; j++) {
+        if (j != i) {
+          sum -= a[i][j] * x[j];
+        }
+      }
+      double new_val = sum / a[i][i];
+      double diff = fabs(new_val - x[i]);
+      if (diff > max_diff) {
+        max_diff = diff;
+      }
+      x[i] = new_val;
+    }
+
+    iter++;
+    printf("%2d\t", iter);
+    for (int i = 0; i < n; i++) {
+      printf("%.6f\t", x[i]);
+    }
+    printf("\n");
+
+    if (max_diff < eps) {
+      break;
+    }
+  }
+
+  printf("\nSolution after %d iterations:\n", iter);
+  for (int i = 0; i < n; i++) {
+    printf("x[%d] = %.6f\n", i, x[i]);
+  }
+
+  return 0;
+}
+// Guass Elimination 
+#include <math.h>
+#include <stdio.h>
+
+#define MAX 10
+
+int main() {
+  int n;
+  double a[MAX][MAX + 1], x[MAX];
+
+  printf("Enter number of equations: ");
+  scanf("%d", &n);
+
+  printf("Enter augmented matrix [A|b] row by row:\n");
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j <= n; j++) {
+      scanf("%lf", &a[i][j]);
+    }
+  }
+
+  for (int i = 0; i < n - 1; i++) {
+    int max_row = i;
+    for (int k = i + 1; k < n; k++) {
+      if (fabs(a[k][i]) > fabs(a[max_row][i])) {
+        max_row = k;
+      }
+    }
+    for (int j = 0; j <= n; j++) {
+      double temp = a[i][j];
+      a[i][j] = a[max_row][j];
+      a[max_row][j] = temp;
+    }
+
+    if (fabs(a[i][i]) < 1e-12) {
+      printf("No unique solution exists.\n");
+      return 1;
+    }
+
+    for (int k = i + 1; k < n; k++) {
+      double factor = a[k][i] / a[i][i];
+      for (int j = i; j <= n; j++) {
+        a[k][j] -= factor * a[i][j];
+      }
+    }
+  }
+
+  printf("\nUpper Triangular Matrix [A|b]:\n");
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j <= n; j++) {
+      printf("%10.4f", a[i][j]);
+    }
+    printf("\n");
+  }
+
+  for (int i = n - 1; i >= 0; i--) {
+    double sum = a[i][n];
+    for (int j = i + 1; j < n; j++) {
+      sum -= a[i][j] * x[j];
+    }
+    x[i] = sum / a[i][i];
+  }
+
+  printf("\nSolution:\n");
+  for (int i = 0; i < n; i++) {
+    printf("x[%d] = %.6f\n", i, x[i]);
+  }
+
+  return 0;
+}
